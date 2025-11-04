@@ -503,19 +503,7 @@ void menuProcesos() {
             }
             case 4: {
                 int id;
-                cout << "ID del proceso a eliminar: ";
-                cin >> id;
-                cin.ignore();
-                if (eliminarProceso(id)) {
-                    cout << "[OK] Proceso eliminado.\n";
-                } else {
-                    cout << "[!] Proceso no encontrado.\n";
-                }
-                pausar();
-                break;
-            }
-            case 4: {
-                int id;
+                char confirmacion;
                 cout << "\n=== ELIMINAR PROCESO ===\n";
                 // Validar entrada numérica
                 while (true) {
@@ -536,7 +524,6 @@ void menuProcesos() {
                     pausar();
                     break;
                 }
-                char confirmacion;
                 cout << "¿Está seguro que desea eliminar el proceso '" << proc->nombre << "'? (S/N): ";
                 cin >> confirmacion;
                 cin.ignore();
@@ -577,23 +564,52 @@ void menuPlanificador() {
         switch (opcion) {
             case 1: {
                 int id, prioridad;
-                cout << "ID del proceso a encolar: ";
-                cin >> id;
-                cin.ignore();
-                Proceso* proc = buscarProcesoPorID(id);
-                if (proc) {
-                    cout << "Prioridad en cola (1-10, mayor = mas urgente): ";
-                    cin >> prioridad;
-                    cin.ignore();
-                    encolarProceso(id, proc->nombre, prioridad);
-                } else {
-                    cout << "[!] Proceso no encontrado.\n";
+                // Mostrar procesos disponibles
+                mostrarProcesos();
+                // Validar ID del proceso
+                while (true) {
+                    cout << "Ingrese el ID del proceso a encolar: ";
+                    cin >> id;
+                    if (cin.fail()) {
+                        cout << "[!] Ingrese un número válido.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
+                    }
                 }
+                // Buscar proceso existente
+                Proceso* proc = buscarProcesoPorID(id);
+                if (!proc) {
+                    cout << "[!] No se encontró un proceso con ese ID.\n";
+                    pausar();
+                    break;
+                }
+                // Validar prioridad (1 a 10)
+                while (true) {
+                    cout << "Ingrese la prioridad en la cola (1-10, mayor = más urgente): ";
+                    cin >> prioridad;
+                    if (cin.fail() || prioridad < 1 || prioridad > 10) {
+                        cout << "[!] Prioridad inválida. Intente nuevamente.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
+                    }
+                }
+                encolarProceso(proc->id, proc->nombre, prioridad);
+                cout << "[OK] Proceso agregado a la cola de ejecución.\n";
                 pausar();
                 break;
             }
             case 2: {
-                desencolaYEjecutar();
+                if (!desencolaYEjecutar()) {
+                    cout << "[!] No hay procesos en la cola.\n";
+                } else {
+                    cout << "[OK] Proceso ejecutado correctamente.\n";
+                }
                 pausar();
                 break;
             }
