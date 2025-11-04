@@ -363,13 +363,26 @@ void menuProcesos() {
             case 1: {
                 string nombre, estado;
                 int prioridad;
+                char estadoChar;
                 cout << "Nombre: ";
                 getline(cin, nombre);
                 cout << "Prioridad (1-10): ";
                 cin >> prioridad;
                 cin.ignore();
-                cout << "Estado (Listo/Ejecucion/Bloqueado): ";
-                getline(cin, estado);
+                cout << "Estado [L = Listo, E = Ejecucion, B = Bloqueado]: ";
+                cin >> estadoChar;
+                cin.ignore();
+                
+                estadoChar = toupper(estadoChar);
+                
+                if (estadoChar == 'L') estado = "Listo";
+                else if (estadoChar == 'E') estado = "Ejecucion";
+                else if (estadoChar == 'B') estado = "Bloqueado";
+                else {
+                    cout << "[!] Estado invalido. Se asignara 'Listo' por defecto.\n";
+                    estado = "Listo";
+                }
+                
                 insertarProceso(nombre, prioridad, estado);
                 pausar();
                 break;
@@ -392,11 +405,21 @@ void menuProcesos() {
             case 3: {
                 int id, prioridad;
                 string estado;
+                char estadoChar;
                 cout << "ID del proceso: ";
                 cin >> id;
                 cin.ignore();
-                cout << "Nuevo estado (vacio para no cambiar): ";
-                getline(cin, estado);
+                cout << "Nuevo estado [L = Listo, E = Ejecucion, B = Bloqueado]: ";
+                estadoChar = cin.get();
+                cin.ignore();
+                estadoChar = toupper(estadoChar);
+                if (estadoChar == 'L') estado = "Listo";
+                else if (estadoChar == 'E') estado = "Ejecucion";
+                else if (estadoChar == 'B') estado = "Bloqueado";
+                else {
+                        cout << "[!] Estado invalido. No se realizara cambio.\n";
+                        estado = "";
+                    }
                 cout << "Nueva prioridad (0 para no cambiar): ";
                 cin >> prioridad;
                 cin.ignore();
