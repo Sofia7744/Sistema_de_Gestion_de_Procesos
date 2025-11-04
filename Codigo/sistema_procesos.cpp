@@ -361,72 +361,142 @@ void menuProcesos() {
         
         switch (opcion) {
             case 1: {
-                string nombre, estado;
+                string nombre;
                 int prioridad;
                 char estadoChar;
-                cout << "Nombre: ";
-                getline(cin, nombre);
-                cout << "Prioridad (1-10): ";
-                cin >> prioridad;
+                string estado;
+            
+                cout << "\n=== AGREGAR NUEVO PROCESO ===\n";
+            
+                // Validar nombre no vacío
+                do {
+                    cout << "Nombre: ";
+                    getline(cin, nombre);
+                    if (nombre.empty()) cout << "[!] El nombre no puede estar vacío.\n";
+                } while (nombre.empty());
+            
+                // Validar prioridad (1–10)
+                do {
+                    cout << "Prioridad (1-10): ";
+                    cin >> prioridad;
+                    if (cin.fail() || prioridad < 1 || prioridad > 10) {
+                        cout << "[!] Ingrese un número válido entre 1 y 10.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                        prioridad = -1; // reinicia el valor
+                    }
+                } while (prioridad < 1 || prioridad > 10);
                 cin.ignore();
+            
+                // Validar estado
                 cout << "Estado [L = Listo, E = Ejecucion, B = Bloqueado]: ";
                 cin >> estadoChar;
                 cin.ignore();
-                
+            
                 estadoChar = toupper(estadoChar);
-                
+            
                 if (estadoChar == 'L') estado = "Listo";
                 else if (estadoChar == 'E') estado = "Ejecucion";
                 else if (estadoChar == 'B') estado = "Bloqueado";
                 else {
-                    cout << "[!] Estado invalido. Se asignara 'Listo' por defecto.\n";
+                    cout << "[!] Estado inválido. Se asignará 'Listo' por defecto.\n";
                     estado = "Listo";
                 }
-                
+
                 insertarProceso(nombre, prioridad, estado);
                 pausar();
                 break;
             }
             case 2: {
                 int id;
-                cout << "ID del proceso: ";
-                cin >> id;
-                cin.ignore();
+                cout << "\n=== BUSCAR PROCESO ===\n";
+                // Validar entrada numérica
+                while (true) {
+                    cout << "Ingrese el ID del proceso: ";
+                    cin >> id;
+            
+                    if (cin.fail()) {
+                        cout << "[!] Ingrese un número válido.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
+                    }
+                }
                 Proceso* proc = buscarProcesoPorID(id);
                 if (proc) {
-                    cout << "\nID: " << proc->id << "\nNombre: " << proc->nombre 
-                         << "\nPrioridad: " << proc->prioridad << "\nEstado: " << proc->estado << "\n";
+                    cout << "\n--- PROCESO ENCONTRADO ---\n";
+                    cout << "ID: " << proc->id << "\nNombre: " << proc->nombre
+                         << "\nPrioridad: " << proc->prioridad
+                         << "\nEstado: " << proc->estado << "\n";
                 } else {
-                    cout << "[!] Proceso no encontrado.\n";
+                    cout << "\n[!] No se encontró un proceso con ID " << id << ".\n";
                 }
                 pausar();
                 break;
             }
             case 3: {
-                int id, prioridad;
-                string estado;
+                int id;
+                int nuevaPrioridad;
                 char estadoChar;
-                cout << "ID del proceso: ";
-                cin >> id;
-                cin.ignore();
-                cout << "Nuevo estado [L = Listo, E = Ejecucion, B = Bloqueado]: ";
-                estadoChar = cin.get();
-                cin.ignore();
-                estadoChar = toupper(estadoChar);
-                if (estadoChar == 'L') estado = "Listo";
-                else if (estadoChar == 'E') estado = "Ejecucion";
-                else if (estadoChar == 'B') estado = "Bloqueado";
-                else {
-                        cout << "[!] Estado invalido. No se realizara cambio.\n";
-                        estado = "";
+                string nuevoEstado = "";
+                cout << "\n=== MODIFICAR PROCESO ===\n";
+                // Validar entrada de ID
+                while (true) {
+                    cout << "Ingrese el ID del proceso: ";
+                    cin >> id;
+                    if (cin.fail()) {
+                        cout << "[!] Ingrese un número válido.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
                     }
-                cout << "Nueva prioridad (0 para no cambiar): ";
-                cin >> prioridad;
+                }
+                Proceso* proc = buscarProcesoPorID(id);
+                if (!proc) {
+                    cout << "[!] No se encontró un proceso con ese ID.\n";
+                    pausar();
+                    break;
+                }
+                // Mostrar proceso actual
+                cout << "\n--- DATOS ACTUALES ---\n";
+                cout << "Nombre: " << proc->nombre << "\n";
+                cout << "Prioridad actual: " << proc->prioridad << "\n";
+                cout << "Estado actual: " << proc->estado << "\n\n";
+                // Modificar prioridad
+                do {
+                    cout << "Nueva prioridad (1-10, 0 = no cambiar): ";
+                    cin >> nuevaPrioridad;
+                    if (cin.fail()) {
+                        cout << "[!] Ingrese un número válido.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                        nuevaPrioridad = -1;
+                    } else if (nuevaPrioridad != 0 && (nuevaPrioridad < 1 || nuevaPrioridad > 10)) {
+                        cout << "[!] Valor fuera de rango.\n";
+                        nuevaPrioridad = -1;
+                    }
+                } while (nuevaPrioridad < 0);
                 cin.ignore();
-                if (modificarProceso(id, estado, prioridad)) {
+                // Modificar estado
+                cout << "Nuevo estado [L = Listo, E = Ejecucion, B = Bloqueado, Enter = no cambiar]: ";
+                estadoChar = cin.get();
+                if (estadoChar != '\n') {
+                    estadoChar = toupper(estadoChar);
+                    if (estadoChar == 'L') nuevoEstado = "Listo";
+                    else if (estadoChar == 'E') nuevoEstado = "Ejecucion";
+                    else if (estadoChar == 'B') nuevoEstado = "Bloqueado";
+                    else {
+                        cout << "[!] Estado inválido. No se modificará.\n";
+                    }
+                }
+                if (modificarProceso(id, nuevoEstado, nuevaPrioridad)) {
                     cout << "[OK] Proceso actualizado.\n";
                 } else {
-                    cout << "[!] Proceso no encontrado.\n";
+                    cout << "[!] No se pudo modificar el proceso.\n";
                 }
                 pausar();
                 break;
@@ -440,6 +510,42 @@ void menuProcesos() {
                     cout << "[OK] Proceso eliminado.\n";
                 } else {
                     cout << "[!] Proceso no encontrado.\n";
+                }
+                pausar();
+                break;
+            }
+            case 4: {
+                int id;
+                cout << "\n=== ELIMINAR PROCESO ===\n";
+                // Validar entrada numérica
+                while (true) {
+                    cout << "Ingrese el ID del proceso a eliminar: ";
+                    cin >> id;
+                    if (cin.fail()) {
+                        cout << "[!] Ingrese un número válido.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
+                    }
+                }
+                Proceso* proc = buscarProcesoPorID(id);
+                if (!proc) {
+                    cout << "[!] No se encontró un proceso con ese ID.\n";
+                    pausar();
+                    break;
+                }
+                char confirmacion;
+                cout << "¿Está seguro que desea eliminar el proceso '" << proc->nombre << "'? (S/N): ";
+                cin >> confirmacion;
+                cin.ignore();
+                confirmacion = toupper(confirmacion);
+                if (confirmacion == 'S') {
+                    if (eliminarProceso(id)) cout << "[OK] Proceso eliminado correctamente.\n";
+                    else cout << "[!] Ocurrió un error al eliminar el proceso.\n";
+                } else {
+                    cout << "[!] Operación cancelada.\n";
                 }
                 pausar();
                 break;
