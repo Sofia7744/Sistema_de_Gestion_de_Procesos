@@ -644,14 +644,32 @@ void menuMemoria() {
         
         switch (opcion) {
             case 1: {
+                cout << "\n=== ASIGNAR BLOQUE DE MEMORIA ===\n";
                 int tamanio;
                 string proceso;
-                cout << "Tamanio (KB): ";
-                cin >> tamanio;
-                cin.ignore();
-                cout << "Nombre del proceso: ";
-                getline(cin, proceso);
+                // Validar tamaño del bloque
+                while (true) {
+                    cout << "Tamaño del bloque (en KB): ";
+                    cin >> tamanio;
+                    if (cin.fail() || tamanio <= 0) {
+                        cout << "[!] Ingrese un número válido mayor que 0.\n";
+                        cin.clear();
+                        cin.ignore(1000, '\n');
+                    } else {
+                        cin.ignore();
+                        break;
+                    }
+                }
+                // Validar nombre del proceso (no vacío)
+                do {
+                    cout << "Nombre del proceso: ";
+                    getline(cin, proceso);
+                    if (proceso.empty()) {
+                        cout << "[!] El nombre no puede estar vacío.\n";
+                    }
+                } while (proceso.empty());
                 asignarMemoria(tamanio, proceso);
+                cout << "[OK] Bloque de memoria asignado correctamente.\n";
                 pausar();
                 break;
             }
