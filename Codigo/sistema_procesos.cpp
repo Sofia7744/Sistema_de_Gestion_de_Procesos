@@ -697,6 +697,7 @@ void menuMemoria() {
 }
 
 int main() {
+    setlocale(LC_CTYPE, "Spanish");
     cargarProcesos();
     cargarMemoria();
     cargarCola();
